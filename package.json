@@ -1,0 +1,25 @@
+{
+  "name": "system-design-complete-guide",
+  "version": "1.0.0",
+  "description": "Comprehensive system design reference guide",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "build": "echo 'No build process needed for static site'",
+    "deploy": "gh-pages -d ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/system-design-complete-guide.git"
+  },
+  "keywords": [
+    "system-design",
+    "architecture",
+    "distributed-systems",
+    "interview-preparation",
+    "software-engineering"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "homepage": "https://yourusername.github.io/system-design-complete-guide"
+}
