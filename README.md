@@ -78,13 +78,13 @@ Each topic is organized with appropriate structure based on its category:
 2. **Enable GitHub Pages** in repository settings
 3. **Select source** as "Deploy from a branch" 
 4. **Choose branch** as "main" and folder as "/ (root)"
-5. **Access your site** at `https://yourusername.github.io/repository-name`
+5. **Access your site** at `https://AshutoshanandSinha.github.io/repository-name`
 
 ### Local Development
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/system-design-guide.git
+   git clone https://github.com/AshutoshanandSinha/system-design-guide.git
    cd system-design-guide
    ```
 
