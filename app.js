@@ -1959,6 +1959,1157 @@ const systemDesignData = {
         }
       ]
     }
+  },
+
+  // COMPLETE GUIDE - Interview preparation guide with practical problems
+  complete_guide: {
+    'framework': {
+      title: 'Interview Framework',
+      introduction: "The proven 7-step approach for system design interviews that demonstrates structured thinking and covers all critical aspects.",
+      content: `
+        <div class="framework-steps">
+          <div class="architecture-image">
+            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20240715175832/System-Design-Interview-Framework.webp" alt="7-Step System Design Interview Framework" class="framework-diagram" />
+            <div class="diagram-caption">Figure 1: The 7-Step System Design Interview Framework</div>
+          </div>
+          
+          <h3>The 7-Step System Design Framework</h3>
+          <ol class="framework-list">
+            <li><strong>Clarify Requirements</strong> - Ask clarifying questions about functional and non-functional requirements</li>
+            <li><strong>Estimate Scale</strong> - Calculate back-of-the-envelope estimates for data size, QPS, storage</li>
+            <li><strong>Define APIs</strong> - Design the core APIs that the system will expose</li>
+            <li><strong>High-Level Design</strong> - Create the overall architecture with major components</li>
+            <li><strong>Detailed Design</strong> - Deep dive into critical components and data flow</li>
+            <li><strong>Scale the Design</strong> - Address bottlenecks and scaling challenges</li>
+            <li><strong>Wrap Up</strong> - Summarize design choices and discuss trade-offs</li>
+          </ol>
+          
+          <div class="framework-details">
+            <h4>Framework Application</h4>
+            <ul>
+              <li><strong>Start with Requirements:</strong> Always clarify functional and non-functional requirements first</li>
+              <li><strong>Think Out Loud:</strong> Explain your reasoning for each design decision</li>
+              <li><strong>Consider Trade-offs:</strong> Discuss alternatives and why you chose specific approaches</li>
+              <li><strong>Scale Incrementally:</strong> Start simple, then add complexity and scale considerations</li>
+              <li><strong>Address Bottlenecks:</strong> Identify potential failure points and mitigation strategies</li>
+            </ul>
+
+            <h4>Technical Depth</h4>
+            <ul>
+              <li><strong>Data Storage:</strong> Choose appropriate databases based on access patterns and consistency requirements</li>
+              <li><strong>Caching Strategy:</strong> Implement multi-level caching for performance optimization</li>
+              <li><strong>Load Balancing:</strong> Distribute traffic effectively across servers and regions</li>
+              <li><strong>Monitoring:</strong> Include observability and alerting in your designs</li>
+              <li><strong>Security:</strong> Consider authentication, authorization, and data protection</li>
+            </ul>
+
+            <h4>Common Follow-up Questions</h4>
+            <ul>
+              <li>"How would you handle 10x traffic growth?"</li>
+              <li>"What happens if this component fails?"</li>
+              <li>"How would you monitor and debug this system?"</li>
+              <li>"What security considerations are important?"</li>
+              <li>"How would you reduce latency for global users?"</li>
+            </ul>
+          </div>
+        </div>
+      `
+    },
+    
+    'easy': {
+      title: 'Easy Level Questions (1-9)',
+      introduction: "Entry-level system design problems that focus on fundamental concepts and basic architectural patterns.",
+      content: `
+        <div class="problems-section">
+          <h3>Easy Level Problems</h3>
+          <div class="problem-list">
+            <div class="problem-item">
+              <h4>1. Design URL Shortener (TinyURL)</h4>
+              <p><strong>One-liner and scope:</strong> Design a service that converts long URLs into shorter, memorable links with fast redirection and analytics tracking.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Shorten long URLs and return unique short URLs</li>
+                    <li>Redirect short URLs to original long URLs with minimal latency</li>
+                    <li>Support custom aliases and URL expiration (optional)</li>
+                    <li>Provide basic analytics (click count, geographic data)</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Handle 100M URLs shortened per month with 100:1 read/write ratio</li>
+                    <li>99.9% availability with < 100ms redirect latency</li>
+                    <li>URLs should not be predictable or guessable</li>
+                  </ul>
+                </div>
+
+                <h5>Back-of-the-envelope</h5>
+                <ul>
+                  <li>Write QPS: 100M/month ÷ (30×24×3600) ≈ 40 writes/sec</li>
+                  <li>Read QPS: 40 × 100 = 4000 reads/sec</li>
+                  <li>Storage: 100M URLs × 5 years × 12 months × 500 bytes ≈ 30TB</li>
+                  <li>URL shortening using 7-character Base62 encoding provides 62^7 ≈ 3.5T unique combinations</li>
+                </ul>
+
+                <h5>High-level design</h5>
+                <div class="architecture-image">
+                  <img src="https://media.geeksforgeeks.org/wp-content/uploads/20240715180245/URL-Shortener-System-Design.webp" alt="URL Shortener System Design" class="diagram-image" />
+                  <div class="diagram-caption">Figure 2: URL Shortener High-Level Architecture</div>
+                </div>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Load Balancer + API Gateway:</strong> Distributes traffic and handles rate limiting</li>
+                  <li><strong>URL Shortening Service:</strong> Generates short codes using Base62 encoding or counter-based approach</li>
+                  <li><strong>URL Redirection Service:</strong> Handles GET requests and redirects to original URLs</li>
+                  <li><strong>Cache Layer (Redis):</strong> Stores frequently accessed mappings for fast lookups</li>
+                  <li><strong>Database:</strong> NoSQL (DynamoDB/Cassandra) for scalable key-value storage</li>
+                  <li><strong>Analytics Service:</strong> Tracks click metrics and geographic data</li>
+                </ul>
+
+                <h5>Core APIs</h5>
+                <div class="code-block">
+                  <pre>
+// Shorten URL
+POST /shorten
+{
+  "long_url": "https://example.com/very/long/path",
+  "custom_alias": "optional",
+  "expiration_date": "2024-12-31"
+}
+→ {"short_url": "https://short.ly/abc123"}
+
+// Redirect
+GET /{short_code}
+→ HTTP 302 Redirect to original URL</pre>
+                </div>
+
+                <h5>Scaling strategies</h5>
+                <ul>
+                  <li><strong>Read replicas</strong> for database to handle high read traffic</li>
+                  <li><strong>CDN</strong> for serving redirect responses globally</li>
+                  <li><strong>Circuit breaker</strong> pattern for graceful degradation</li>
+                  <li><strong>Backup short code generation</strong> service for high availability</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>2. Design Leaderboard</h4>
+              <p><strong>One-liner and scope:</strong> Design a real-time gaming leaderboard that supports top-N queries, player rank lookup, and nearby rank queries with low latency.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Display top N players (e.g., top 10, top 100) in real-time</li>
+                    <li>Allow players to query their current rank instantly</li>
+                    <li>Support nearby rank queries (e.g., ranks 45-55 around player at rank 50)</li>
+                    <li>Handle score updates from millions of concurrent players</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Real-time score updates with sub-second latency</li>
+                    <li>Handle thousands of concurrent players and score submissions</li>
+                    <li>Support multiple game types and regional leaderboards</li>
+                  </ul>
+                </div>
+
+                <h5>Back-of-the-envelope</h5>
+                <ul>
+                  <li>Concurrent players: 1M active players</li>
+                  <li>Score updates: 10K updates/sec peak</li>
+                  <li>Read queries: 50K queries/sec (top-N, rank lookups)</li>
+                  <li>Storage: Player profiles + score history ≈ 1TB</li>
+                </ul>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>WebSocket Connections:</strong> Real-time score updates from game clients</li>
+                  <li><strong>Score Update Service:</strong> Validates and processes score changes</li>
+                  <li><strong>Redis Sorted Sets:</strong> Primary data structure for leaderboard storage</li>
+                  <li><strong>Cache Layers:</strong> Hot leaderboard data cached for fast access</li>
+                  <li><strong>Analytics Service:</strong> Track leaderboard engagement and player behavior</li>
+                </ul>
+
+                <h5>Data storage choices</h5>
+                <ul>
+                  <li><strong>Redis Sorted Sets:</strong> Perfect for leaderboard operations with O(log n) complexity</li>
+                  <li><strong>MySQL/PostgreSQL:</strong> Player profiles and game metadata</li>
+                  <li><strong>Cassandra:</strong> Historical score data and analytics</li>
+                </ul>
+
+                <h5>Core Redis operations</h5>
+                <div class="code-block">
+                  <pre>
+# Add/update player score
+ZADD leaderboard:global 1500 "player123"
+
+# Get top 10 players  
+ZREVRANGE leaderboard:global 0 9 WITHSCORES
+
+# Get player rank
+ZREVRANK leaderboard:global "player123"
+
+# Get nearby players (±5 around player)
+ZREVRANGE leaderboard:global start stop</pre>
+                </div>
+
+                <h5>Detailed components</h5>
+                <ul>
+                  <li><strong>Score Validation:</strong> Prevent cheating with server-side validation</li>
+                  <li><strong>Multi-tier Architecture:</strong> Global → Regional → Friends leaderboards</li>
+                  <li><strong>Real-time Updates:</strong> WebSocket push notifications for rank changes</li>
+                  <li><strong>Partitioning Strategy:</strong> Shard by game_id and region for scalability</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>3. Design Content Delivery Network (CDN)</h4>
+              <p><strong>One-liner and scope:</strong> Design a globally distributed network of servers that cache and deliver web content with low latency and high availability.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Cache and serve static content (images, videos, CSS, JS) from edge locations</li>
+                    <li>Route user requests to nearest edge server automatically</li>
+                    <li>Support cache invalidation and content updates</li>
+                    <li>Handle both static and dynamic content delivery</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Serve content with < 50ms latency globally</li>
+                    <li>Handle millions of requests per second across all edge locations</li>
+                    <li>99.99% availability with automatic failover</li>
+                    <li>Reduce origin server load by 80%+ through effective caching</li>
+                  </ul>
+                </div>
+
+                <h5>Back-of-the-envelope</h5>
+                <ul>
+                  <li>Edge locations: 200+ globally distributed PoPs</li>
+                  <li>Cache hit ratio: 85-95% for optimal performance</li>
+                  <li>Bandwidth: Petabytes of data transferred daily</li>
+                  <li>Origins: Support thousands of origin servers</li>
+                </ul>
+
+                <h5>High-level design</h5>
+                <h6>Components:</h6>
+                <ul>
+                  <li><strong>Edge Servers/PoPs:</strong> Geographically distributed cache servers</li>
+                  <li><strong>Origin Servers:</strong> Source of truth for content</li>
+                  <li><strong>DNS Routing:</strong> Directs users to optimal edge server</li>
+                  <li><strong>Cache Management:</strong> TTL-based invalidation and refresh</li>
+                  <li><strong>Load Balancers:</strong> Distribute load within each PoP</li>
+                </ul>
+
+                <h5>Routing mechanisms</h5>
+                <ul>
+                  <li><strong>DNS-based Routing:</strong> GeoDNS returns nearest edge server IP</li>
+                  <li><strong>Anycast Routing:</strong> Multiple servers share single IP, network routes to nearest</li>
+                  <li><strong>HTTP Redirects:</strong> Application-layer routing based on policies</li>
+                </ul>
+
+                <h5>Caching strategies</h5>
+                <ul>
+                  <li><strong>Push CDN:</strong> Origin actively pushes content to edge servers</li>
+                  <li><strong>Pull CDN:</strong> Edge servers fetch content on-demand from origin</li>
+                  <li><strong>TTL Management:</strong> Time-based cache expiration policies</li>
+                  <li><strong>Cache Hierarchies:</strong> Multiple tiers (edge → regional → origin)</li>
+                </ul>
+
+                <h5>Core APIs</h5>
+                <div class="code-block">
+                  <pre>
+// Cache content
+PUT /cache/{path}
+{
+  "ttl": 3600,
+  "cache_policy": "public",
+  "compression": "gzip"
+}
+
+// Invalidate cache
+DELETE /cache/{path}
+POST /purge
+{
+  "urls": ["https://cdn.example.com/style.css"],
+  "type": "immediate"
+}</pre>
+                </div>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>4. Design Parking Garage System</h4>
+              <p><strong>One-liner and scope:</strong> Design a smart parking system that manages vehicle entry/exit, tracks availability, handles payments, and optimizes space utilization.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Track vehicle entry/exit with automated ticket generation</li>
+                    <li>Support different vehicle types (compact, large, motorcycle, electric)</li>
+                    <li>Handle payment processing (cash, credit card, mobile)</li>
+                    <li>Real-time availability display and reservation system</li>
+                    <li>Multi-level parking with navigation assistance</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Handle 1000+ vehicles simultaneously across multiple levels</li>
+                    <li>Sub-second response time for entry/exit operations</li>
+                    <li>99.9% uptime for payment and access systems</li>
+                  </ul>
+                </div>
+
+                <h5>Back-of-the-envelope</h5>
+                <ul>
+                  <li>Capacity: 2000 parking spots across 5 levels</li>
+                  <li>Peak usage: 80% occupancy during business hours</li>
+                  <li>Transactions: 500 entries/exits per hour peak</li>
+                  <li>Average stay: 3 hours per vehicle</li>
+                </ul>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Entry/Exit Gates:</strong> Automated barriers with license plate recognition</li>
+                  <li><strong>Parking Management System:</strong> Central controller for spot allocation</li>
+                  <li><strong>Payment Processing:</strong> Multi-channel payment gateway</li>
+                  <li><strong>Availability Display:</strong> Real-time status boards per level</li>
+                  <li><strong>Mobile App:</strong> Reservation and payment interface</li>
+                </ul>
+
+                <h5>Core APIs</h5>
+                <div class="code-block">
+                  <pre>
+// Vehicle entry
+POST /entry
+{
+  "license_plate": "ABC123",
+  "vehicle_type": "compact",
+  "entry_gate": "A1"
+}
+→ {"ticket_id": "T123456", "assigned_spot": "L2-45"}
+
+// Payment processing
+POST /payment
+{
+  "ticket_id": "T123456",
+  "payment_method": "credit_card",
+  "amount": 15.50
+}
+
+// Check availability
+GET /availability?level=2&vehicle_type=compact
+→ {"available_spots": 23, "total_spots": 100}</pre>
+                </div>
+
+                <h5>Data storage choices</h5>
+                <ul>
+                  <li><strong>MySQL:</strong> Vehicle records, transactions, user accounts</li>
+                  <li><strong>Redis:</strong> Real-time spot availability and session data</li>
+                  <li><strong>Time-series DB:</strong> Historical usage patterns and analytics</li>
+                </ul>
+
+                <h5>Detailed components</h5>
+                <ul>
+                  <li><strong>Spot Assignment Algorithm:</strong> Optimize for walking distance and level distribution</li>
+                  <li><strong>Dynamic Pricing:</strong> Surge pricing during peak hours</li>
+                  <li><strong>Integration Systems:</strong> Security cameras, license plate recognition</li>
+                  <li><strong>Mobile Notifications:</strong> Parking reminders and overstay alerts</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>5. Design Vending Machine</h4>
+              <p><strong>One-liner and scope:</strong> Design a smart vending machine system that handles product selection, payment processing, inventory management, and remote monitoring.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Product selection with inventory validation</li>
+                    <li>Multiple payment methods (cash, card, mobile payments)</li>
+                    <li>Automatic product dispensing with confirmation</li>
+                    <li>Inventory tracking with low-stock alerts</li>
+                    <li>Remote monitoring and management capabilities</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Process transactions within 30 seconds</li>
+                    <li>Support 500+ transactions per day reliably</li>
+                    <li>99% uptime with offline operation capability</li>
+                  </ul>
+                </div>
+
+                <h5>State machine design</h5>
+                <p><strong>States:</strong> Idle → Ready → Product Selected → Payment Processing → Dispensing → Complete</p>
+
+                <h5>High-level design</h5>
+                <h6>Components:</h6>
+                <ul>
+                  <li><strong>User Interface:</strong> Touch screen with product display</li>
+                  <li><strong>Payment Processing:</strong> Multi-method payment gateway</li>
+                  <li><strong>Inventory Management:</strong> Real-time stock tracking</li>
+                  <li><strong>Dispensing Mechanism:</strong> Motorized product delivery</li>
+                  <li><strong>Remote Monitoring:</strong> IoT connectivity for management</li>
+                </ul>
+
+                <h5>Core APIs</h5>
+                <div class="code-block">
+                  <pre>
+// Select product
+POST /select
+{
+  "product_id": "P001",
+  "quantity": 1
+}
+→ {"price": 2.50, "available": true, "session_id": "S123"}
+
+// Process payment
+POST /payment
+{
+  "session_id": "S123",
+  "payment_method": "card",
+  "amount": 2.50
+}
+→ {"status": "success", "change": 0.00, "dispense": true}
+
+// Inventory status
+GET /inventory
+→ [{"product_id": "P001", "name": "Coke", "stock": 15, "price": 2.50}]</pre>
+                </div>
+
+                <h5>Design patterns used</h5>
+                <ul>
+                  <li><strong>State Pattern:</strong> Manage vending machine states and transitions</li>
+                  <li><strong>Strategy Pattern:</strong> Different payment processing methods</li>
+                  <li><strong>Observer Pattern:</strong> Inventory alerts and monitoring</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>6. Design Distributed Key-Value Store</h4>
+              <p><strong>One-liner and scope:</strong> Design a scalable key-value database that distributes data across multiple nodes with configurable consistency, high availability, and fault tolerance.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Basic operations: GET, PUT, DELETE with sub-ms latency</li>
+                    <li>Configurable consistency models (strong, eventual)</li>
+                    <li>Automatic data partitioning and replication</li>
+                    <li>Node failure detection and recovery</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Scale to thousands of nodes globally</li>
+                    <li>Handle millions of operations per second</li>
+                    <li>Tunable CAP theorem trade-offs (CP vs AP)</li>
+                    <li>99.99% availability target</li>
+                  </ul>
+                </div>
+
+                <h5>CAP Theorem considerations</h5>
+                <div class="architecture-image">
+                  <img src="https://media.geeksforgeeks.org/wp-content/uploads/20240715181420/CAP-Theorem-Distributed-Systems.webp" alt="CAP Theorem in Distributed Systems" class="diagram-image" />
+                  <div class="diagram-caption">Figure 3: CAP Theorem Trade-offs in Distributed Systems</div>
+                </div>
+                <h6>Design choices:</h6>
+                <ul>
+                  <li><strong>AP System:</strong> Prioritize availability and partition tolerance over consistency</li>
+                  <li><strong>Eventual Consistency:</strong> Accept temporary inconsistencies for higher availability</li>
+                  <li><strong>Conflict Resolution:</strong> Last-write-wins or vector clocks for concurrent updates</li>
+                </ul>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Consistent Hashing Ring:</strong> Distribute keys across nodes evenly</li>
+                  <li><strong>Replication Manager:</strong> Maintain N replicas per key</li>
+                  <li><strong>Membership Service:</strong> Track node health and cluster changes</li>
+                  <li><strong>Anti-entropy Service:</strong> Repair inconsistencies between replicas</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>7. Design Distributed Cache</h4>
+              <p><strong>One-liner and scope:</strong> Design a high-performance distributed caching system that provides fast data access with automatic failover, cache coherence, and horizontal scaling.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>8. Design Authentication System</h4>
+              <p><strong>One-liner and scope:</strong> Design a secure, scalable authentication system supporting multiple authentication methods, session management, and role-based access control.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>9. Design UPI Payment System</h4>
+              <p><strong>One-liner and scope:</strong> Design a real-time payment system for instant money transfers using virtual payment addresses with strong consistency and fraud detection.</p>
+            </div>
+          </div>
+        </div>
+      `
+    },
+
+    'medium': {
+      title: 'Medium Level Questions (10-34)',
+      introduction: "Intermediate problems that require understanding of complex distributed systems patterns and scalability considerations.",
+      content: `
+        <div class="problems-section">
+          <h3>Medium Level Problems</h3>
+          <div class="problem-list">
+            <div class="problem-item">
+              <h4>10. Design WhatsApp</h4>
+              <p><strong>One-liner and scope:</strong> Design a real-time messaging platform supporting billions of users with end-to-end encryption, multimedia sharing, and global scalability.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>One-to-one and group messaging with multimedia support</li>
+                    <li>End-to-end encryption for message privacy</li>
+                    <li>Online/offline status and last seen timestamps</li>
+                    <li>Message delivery status (sent, delivered, read)</li>
+                    <li>Voice and video calling functionality</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Support 2B+ users globally with 100M+ concurrent connections</li>
+                    <li>Message delivery latency < 100ms</li>
+                    <li>Handle 100B+ messages per day</li>
+                    <li>99.99% availability with global infrastructure</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Message Gateway:</strong> WebSocket connections for real-time messaging</li>
+                  <li><strong>Message Service:</strong> Message routing, storage, and delivery</li>
+                  <li><strong>User Service:</strong> Profile management and online status</li>
+                  <li><strong>Media Service:</strong> Image, video, and file sharing with CDN</li>
+                  <li><strong>Encryption Service:</strong> End-to-end encryption with Signal Protocol</li>
+                  <li><strong>Notification Service:</strong> Push notifications for offline users</li>
+                </ul>
+
+                <h5>Message delivery</h5>
+                <ul>
+                  <li><strong>Online Users:</strong> Direct WebSocket delivery</li>
+                  <li><strong>Offline Users:</strong> Store and forward with push notifications</li>
+                  <li><strong>Group Messages:</strong> Fan-out to all group members</li>
+                  <li><strong>Acknowledgments:</strong> Delivery receipts and read receipts</li>
+                </ul>
+
+                <h5>Scaling strategies</h5>
+                <ul>
+                  <li><strong>Horizontal sharding:</strong> Partition users across message servers</li>
+                  <li><strong>Message queues:</strong> Reliable delivery with offline storage</li>
+                  <li><strong>CDN:</strong> Global distribution of media content</li>
+                  <li><strong>Load balancing:</strong> Distribute WebSocket connections</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>11. Design Spotify</h4>
+              <p><strong>One-liner and scope:</strong> Design a music streaming platform with personalized recommendations, social features, and high-quality audio delivery at global scale.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Stream music with multiple quality levels (96kbps to 320kbps)</li>
+                    <li>Personalized playlists and music recommendations</li>
+                    <li>Social features: follow friends, share music, collaborative playlists</li>
+                    <li>Offline music downloading for premium users</li>
+                    <li>Search and discovery across millions of tracks</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Support 400M+ users with 180M+ premium subscribers</li>
+                    <li>Stream 50M+ songs with < 200ms startup latency</li>
+                    <li>Handle petabytes of audio content globally</li>
+                    <li>99.9% availability for uninterrupted music experience</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Music Catalog Service:</strong> Metadata for tracks, albums, artists</li>
+                  <li><strong>Streaming Service:</strong> Audio content delivery with CDN</li>
+                  <li><strong>Recommendation Engine:</strong> ML-based personalized suggestions</li>
+                  <li><strong>User Service:</strong> Profiles, preferences, subscription management</li>
+                  <li><strong>Social Service:</strong> Following, sharing, collaborative features</li>
+                  <li><strong>Search Service:</strong> Full-text search across music catalog</li>
+                </ul>
+
+                <h5>Recommendation system</h5>
+                <ul>
+                  <li><strong>Collaborative Filtering:</strong> User-based and item-based recommendations</li>
+                  <li><strong>Content-Based Filtering:</strong> Audio analysis and genre classification</li>
+                  <li><strong>Matrix Factorization:</strong> Latent factor models for music taste</li>
+                  <li><strong>Deep Learning:</strong> Neural networks for complex pattern recognition</li>
+                  <li><strong>Hybrid Approach:</strong> Combine multiple signals for personalized recommendations</li>
+                  <li><strong>Real-time Updates:</strong> Update recommendations based on current listening session</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>12. Design Distributed Job Scheduler</h4>
+              <p><strong>One-liner and scope:</strong> Design a fault-tolerant job scheduling system that can execute millions of jobs across thousands of worker nodes with priority queues and retry mechanisms.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Schedule jobs with cron-like expressions and one-time execution</li>
+                    <li>Priority-based job queues with SLA guarantees</li>
+                    <li>Job dependencies and workflow orchestration</li>
+                    <li>Retry mechanisms with exponential backoff</li>
+                    <li>Real-time job monitoring and alerting</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Handle 1M+ jobs per day across global data centers</li>
+                    <li>Job scheduling accuracy within 1 second</li>
+                    <li>99.99% job execution reliability</li>
+                    <li>Auto-scaling worker nodes based on queue depth</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Job Scheduler:</strong> Cron engine with distributed job assignment</li>
+                  <li><strong>Message Queue:</strong> Kafka/RabbitMQ for job distribution to workers</li>
+                  <li><strong>Worker Pool:</strong> Auto-scaling compute resources for job execution</li>
+                  <li><strong>State Management:</strong> Track job status, retries, and dependencies</li>
+                  <li><strong>Monitoring Dashboard:</strong> Real-time metrics and job execution history</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>13. Design Scalable Notification Service</h4>
+              <p><strong>One-liner and scope:</strong> Design a multi-channel notification system supporting email, SMS, push notifications, and in-app messages with delivery guarantees and user preferences.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Send notifications via email, SMS, push notifications, in-app messages</li>
+                    <li>User preference management (channels, frequency, do-not-disturb)</li>
+                    <li>Template-based messaging with personalization</li>
+                    <li>Delivery tracking and analytics</li>
+                    <li>Rate limiting and spam prevention</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Handle 1B+ notifications per day</li>
+                    <li>Delivery latency < 30 seconds for urgent notifications</li>
+                    <li>99.9% delivery success rate</li>
+                    <li>Support 100M+ user preference profiles</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Notification API:</strong> Accept notification requests from upstream services</li>
+                  <li><strong>Template Engine:</strong> Dynamic content generation with user personalization</li>
+                  <li><strong>Channel Routing:</strong> Route notifications based on user preferences</li>
+                  <li><strong>Delivery Services:</strong> Email (SES), SMS (Twilio), Push (FCM/APNS)</li>
+                  <li><strong>Analytics Service:</strong> Track delivery rates, open rates, click-through rates</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>14. Design Instagram</h4>
+              <p><strong>One-liner and scope:</strong> Design a photo and video sharing platform with social features, real-time feeds, content discovery, and scalable media storage.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Upload and share photos/videos with filters and editing</li>
+                    <li>Social features: follow users, like, comment, share posts</li>
+                    <li>Stories feature with 24-hour expiration</li>
+                    <li>Explore page with personalized content discovery</li>
+                    <li>Direct messaging between users</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Support 1B+ users with 500M+ daily active users</li>
+                    <li>Handle 100M+ photos/videos uploaded daily</li>
+                    <li>Feed generation latency < 200ms</li>
+                    <li>99.9% availability with global CDN distribution</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Media Upload Service:</strong> Image/video processing, compression, and storage</li>
+                  <li><strong>Feed Generation Service:</strong> Timeline assembly with ranking algorithms</li>
+                  <li><strong>Social Graph Service:</strong> Follow relationships and social interactions</li>
+                  <li><strong>Content Discovery:</strong> ML-based recommendations for Explore page</li>
+                  <li><strong>Messaging Service:</strong> Direct messages with media sharing support</li>
+                </ul>
+
+                <h5>Feed generation strategies</h5>
+                <ul>
+                  <li><strong>Pull Model:</strong> Generate feed on-demand (suitable for users following many accounts)</li>
+                  <li><strong>Push Model:</strong> Pre-compute feeds for all followers (suitable for users with few followings)</li>  
+                  <li><strong>Hybrid Model:</strong> Push for normal users, pull for celebrities to avoid fan-out explosion</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>15. Design Tinder</h4>
+              <p><strong>One-liner and scope:</strong> Design a location-based dating app with user matching algorithms, real-time messaging, and scalable user discovery.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>User profile creation with photos and preferences</li>
+                    <li>Location-based user discovery within specified radius</li>
+                    <li>Swipe-based matching (mutual likes create matches)</li>
+                    <li>Real-time messaging between matched users</li>
+                    <li>Premium features: super likes, boosts, passport (location change)</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Support 100M+ users globally</li>
+                    <li>User discovery latency < 500ms</li>
+                    <li>Real-time messaging with < 100ms latency</li>
+                    <li>Handle 1B+ swipes per day</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>User Service:</strong> Profile management and preference settings</li>
+                  <li><strong>Location Service:</strong> Geospatial indexing for proximity-based discovery</li>
+                  <li><strong>Matching Engine:</strong> Process swipes and create mutual matches</li>
+                  <li><strong>Recommendation Service:</strong> ML-based user suggestions</li>
+                  <li><strong>Messaging Service:</strong> Real-time chat for matched users</li>
+                </ul>
+
+                <h5>Geospatial challenges</h5>
+                <ul>
+                  <li><strong>Geohashing:</strong> Encode lat/lng into searchable strings</li>
+                  <li><strong>QuadTree/R-Tree:</strong> Spatial data structures for efficient proximity queries</li>
+                  <li><strong>Redis GeoSpatial:</strong> Built-in commands for location-based queries</li>
+                  <li><strong>Sharding Strategy:</strong> Partition by geographic regions</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>16. Design Facebook</h4>
+              <p><strong>One-liner and scope:</strong> Design a comprehensive social networking platform with news feeds, social graphs, content sharing, and real-time interactions at massive scale.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>17. Design Twitter</h4>
+              <p><strong>One-liner and scope:</strong> Design a microblogging platform with real-time tweet delivery, trending topics, social features, and global scalability.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>18. Design Reddit</h4>
+              <p><strong>One-liner and scope:</strong> Design a content aggregation platform with voting, comments, communities (subreddits), and democratic content ranking.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>19-34. Additional Medium Problems</h4>
+              <p><strong>Including:</strong> Netflix, YouTube, Google Search, Amazon, TikTok, Shopify, Airbnb, Autocomplete, Rate Limiter, Kafka, Flight Booking, Online Code Editor, Stock Exchange, Analytics Platform, Payment System, Digital Wallet</p>
+              <div class="problem-details">
+                <h5>Key Focus Areas:</h5>
+                <ul>
+                  <li><strong>Netflix/YouTube:</strong> Video streaming, CDN optimization, recommendation engines</li>
+                  <li><strong>Google Search:</strong> Web crawling, indexing, ranking algorithms</li>
+                  <li><strong>Amazon:</strong> E-commerce architecture, inventory management, order processing</li>
+                  <li><strong>TikTok:</strong> Short-form video platform, viral content algorithms</li>
+                  <li><strong>Shopify:</strong> E-commerce platform, multi-tenant architecture</li>
+                  <li><strong>Airbnb:</strong> Marketplace platform, search and booking systems</li>
+                  <li><strong>Rate Limiter:</strong> API throttling, distributed rate limiting algorithms</li>
+                  <li><strong>Kafka:</strong> Distributed event streaming, message queuing</li>
+                  <li><strong>Payment Systems:</strong> Financial transactions, fraud detection, compliance</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    },
+
+    'hard': {
+      title: 'Hard Level Questions (35-49)',
+      introduction: "Advanced problems that require deep understanding of distributed systems, consistency models, and complex architectural patterns.",
+      content: `
+        <div class="problems-section">
+          <h3>Hard Level Problems</h3>
+          <div class="problem-list">
+            <div class="problem-item">
+              <h4>35. Design Location Based Service (Yelp)</h4>
+              <p><strong>One-liner and scope:</strong> Design a local business discovery platform with geospatial search, reviews, and real-time business information at massive scale.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Search businesses by location, category, and keywords</li>
+                    <li>User reviews and ratings with moderation</li>
+                    <li>Business profiles with photos, hours, contact info</li>
+                    <li>Real-time business updates and status</li>
+                    <li>Social features: check-ins, tips, friend recommendations</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Support 100M+ users discovering 10M+ businesses</li>
+                    <li>Location search results within 200ms globally</li>
+                    <li>Handle 1B+ search queries per day</li>
+                    <li>99.9% availability for business discovery</li>
+                  </ul>
+                </div>
+
+                <h5>Geospatial challenges</h5>
+                <ul>
+                  <li><strong>Quadtree/R-tree:</strong> Spatial indexing for efficient proximity searches</li>
+                  <li><strong>Geohashing:</strong> Encode locations for database sharding</li>
+                  <li><strong>Spatial Databases:</strong> PostGIS or specialized geo databases</li>
+                  <li><strong>Search Optimization:</strong> Multi-level indexing for location + category queries</li>
+                </ul>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Search Service:</strong> Geospatial search with ElasticSearch/Solr</li>
+                  <li><strong>Business Service:</strong> Business profiles and metadata management</li>
+                  <li><strong>Review Service:</strong> User reviews, ratings, and content moderation</li>
+                  <li><strong>Location Service:</strong> Geospatial indexing and proximity calculations</li>
+                  <li><strong>Recommendation Engine:</strong> Personalized business suggestions</li>
+                </ul>
+
+                <h5>Scaling strategies</h5>
+                <ul>
+                  <li><strong>Geographic sharding:</strong> Partition data by location regions</li>
+                  <li><strong>Read replicas:</strong> Multiple read-only databases per region</li>
+                  <li><strong>Caching layers:</strong> Popular searches and business data</li>
+                  <li><strong>CDN:</strong> Static content and images globally distributed</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>36. Design Uber</h4>
+              <p><strong>One-liner and scope:</strong> Design a ride-sharing platform with real-time driver-rider matching, dynamic pricing, route optimization, and global scalability.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Real-time driver-rider matching based on proximity and preferences</li>
+                    <li>Dynamic pricing based on supply-demand and location</li>
+                    <li>GPS tracking and route optimization for efficient trips</li>
+                    <li>Payment processing with multiple methods</li>
+                    <li>Trip history and rating system for drivers and riders</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Handle 15M+ trips per day globally</li>
+                    <li>Driver-rider matching within 30 seconds</li>
+                    <li>Support 1M+ concurrent users during peak hours</li>
+                    <li>99.99% payment processing reliability</li>
+                  </ul>
+                </div>
+
+                <h5>Core algorithms</h5>
+                <ul>
+                  <li><strong>Matching Algorithm:</strong> Optimize for proximity, wait time, and driver preferences</li>
+                  <li><strong>Dynamic Pricing:</strong> Surge pricing based on demand-supply ratio</li>
+                  <li><strong>Route Optimization:</strong> Real-time traffic data for efficient routing</li>
+                  <li><strong>ETA Prediction:</strong> Machine learning models for accurate time estimates</li>
+                </ul>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Location Service:</strong> Real-time GPS tracking for drivers and riders</li>
+                  <li><strong>Matching Service:</strong> Driver-rider pairing algorithms</li>
+                  <li><strong>Pricing Service:</strong> Dynamic pricing engine with surge calculations</li>
+                  <li><strong>Trip Service:</strong> Trip management and state tracking</li>
+                  <li><strong>Payment Service:</strong> Secure transaction processing</li>
+                  <li><strong>Notification Service:</strong> Real-time updates to drivers and riders</li>
+                </ul>
+
+                <h5>Scaling challenges</h5>
+                <ul>
+                  <li><strong>Real-time location updates:</strong> Handle millions of GPS pings per second</li>
+                  <li><strong>Geographic distribution:</strong> Regional data centers for low latency</li>
+                  <li><strong>Database partitioning:</strong> Shard by geography and user ID</li>
+                  <li><strong>Event streaming:</strong> Kafka for real-time data processing</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>37. Design Food Delivery System (DoorDash)</h4>
+              <p><strong>One-liner and scope:</strong> Design a three-sided marketplace connecting customers, restaurants, and delivery drivers with real-time tracking and logistics optimization.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>38. Design Google Docs</h4>
+              <p><strong>One-liner and scope:</strong> Design a collaborative document editing platform with real-time synchronization, conflict resolution, and version control.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>39. Design Google Maps</h4>
+              <p><strong>One-liner and scope:</strong> Design a mapping and navigation service with real-time traffic data, route optimization, and global point-of-interest database.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>40. Design Zoom</h4>
+              <p><strong>One-liner and scope:</strong> Design a video conferencing platform supporting millions of concurrent participants with high-quality audio/video and screen sharing.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>41. Design Distributed Counter</h4>
+              <p><strong>One-liner and scope:</strong> Design a highly available counter service that can handle millions of increments per second with eventual consistency guarantees.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>42. Design Dropbox</h4>
+              <p><strong>One-liner and scope:</strong> Design a cloud file storage and synchronization service with versioning, sharing, and conflict resolution across devices.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>43. Design Ticket Booking System (BookMyShow)</h4>
+              <p><strong>One-liner and scope:</strong> Design a ticket booking platform handling high-concurrency seat selection, payment processing, and inventory management for events.</p>
+              
+              <div class="problem-details">
+                <h5>Key Challenges</h5>
+                <ul>
+                  <li><strong>Concurrency Control:</strong> Prevent double-booking of seats during high demand</li>
+                  <li><strong>Flash Sales:</strong> Handle traffic spikes for popular events</li>
+                  <li><strong>Payment Processing:</strong> Secure transactions with timeout handling</li>
+                  <li><strong>Seat Allocation:</strong> Fair queuing and anti-bot measures</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>44. Design Web Crawler</h4>
+              <p><strong>One-liner and scope:</strong> Design a distributed web crawler that can index billions of web pages efficiently while respecting robots.txt and rate limits.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>45. Design Code Deployment System</h4>
+              <p><strong>One-liner and scope:</strong> Design a continuous deployment system for safely rolling out code changes to thousands of servers with monitoring and rollback capabilities.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>46. Design Cloud Storage (Amazon S3)</h4>
+              <p><strong>One-liner and scope:</strong> Design a highly durable, scalable object storage system supporting billions of objects with 99.999999999% durability guarantee.</p>
+            </div>
+
+            <div class="problem-item">
+              <h4>47. Design Distributed Locking Service</h4>
+              <p><strong>One-liner and scope:</strong> Design a consensus-based distributed locking system providing mutual exclusion across distributed applications with deadlock detection.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Acquire and release distributed locks with timeout support</li>
+                    <li>Deadlock detection and automatic resolution</li>
+                    <li>Lock lease renewal for long-running operations</li>
+                    <li>Fair queuing for lock acquisition ordering</li>
+                    <li>Lock status monitoring and debugging tools</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Handle 100K+ lock operations per second</li>
+                    <li>Lock acquisition latency < 10ms</li>
+                    <li>99.99% availability with consensus-based consistency</li>
+                    <li>Support 1000+ concurrent applications</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Lock Manager:</strong> Core locking logic with consensus protocol</li>
+                  <li><strong>Lease Manager:</strong> Time-based lock expiration and renewal</li>
+                  <li><strong>Deadlock Detector:</strong> Cycle detection in wait-for graphs</li>
+                  <li><strong>Queue Manager:</strong> Fair ordering for lock requests</li>
+                  <li><strong>Monitoring Service:</strong> Lock metrics and debugging tools</li>
+                </ul>
+
+                <h5>Consensus algorithms</h5>
+                <ul>
+                  <li><strong>Raft Protocol:</strong> Leader election and log replication for consistency</li>
+                  <li><strong>Multi-Paxos:</strong> Consensus on lock operations across replicas</li>
+                  <li><strong>Leases:</strong> Time-bounded locks with automatic expiration</li>
+                  <li><strong>Fencing Tokens:</strong> Prevent split-brain scenarios with increasing tokens</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>48. Design Slack</h4>
+              <p><strong>One-liner and scope:</strong> Design a team collaboration platform with real-time messaging, channels, file sharing, and integration with third-party tools.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Real-time messaging in channels and direct messages</li>
+                    <li>File sharing with search and preview capabilities</li>
+                    <li>Third-party app integrations and bot framework</li>
+                    <li>Voice/video calling and screen sharing</li>
+                    <li>Message search across all team history</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Support 10M+ daily active users across teams</li>
+                    <li>Message delivery latency < 100ms</li>
+                    <li>Handle billions of messages with full-text search</li>
+                    <li>99.99% uptime for business-critical communications</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Message Service:</strong> Real-time message routing and storage</li>
+                  <li><strong>Channel Service:</strong> Team organization and membership management</li>
+                  <li><strong>Search Engine:</strong> Full-text search across messages and files</li>
+                  <li><strong>Integration Platform:</strong> Third-party app and webhook management</li>
+                  <li><strong>Notification Service:</strong> Push notifications and email alerts</li>
+                </ul>
+
+                <h5>Real-time messaging</h5>
+                <ul>
+                  <li><strong>WebSocket Connections:</strong> Persistent connections for instant messaging</li>
+                  <li><strong>Message Queuing:</strong> Reliable delivery with offline message storage</li>
+                  <li><strong>Presence Service:</strong> User online status and typing indicators</li>
+                  <li><strong>Push Notifications:</strong> Mobile alerts for offline users</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="problem-item">
+              <h4>49. Design Live Comments System</h4>
+              <p><strong>One-liner and scope:</strong> Design a real-time commenting system for live events supporting millions of concurrent users with spam detection and moderation tools.</p>
+              
+              <div class="problem-details">
+                <h5>Requirements</h5>
+                <div class="requirements-section">
+                  <h6>Functional</h6>
+                  <ul>
+                    <li>Real-time comment posting and display during live events</li>
+                    <li>User authentication and profile-based commenting</li>
+                    <li>Spam detection and automated content moderation</li>
+                    <li>Comment voting (likes/dislikes) and threading</li>
+                    <li>Moderator tools for comment management and user bans</li>
+                  </ul>
+                  <h6>Non-functional</h6>
+                  <ul>
+                    <li>Support 1M+ concurrent users during peak events</li>
+                    <li>Comment display latency < 200ms</li>
+                    <li>Handle 100K+ comments per minute during viral moments</li>
+                    <li>99.9% uptime during scheduled live events</li>
+                  </ul>
+                </div>
+
+                <h5>High-level design</h5>
+                <h6>Core components:</h6>
+                <ul>
+                  <li><strong>Comment Service:</strong> Real-time comment ingestion and distribution</li>
+                  <li><strong>Moderation Engine:</strong> AI-based content filtering and spam detection</li>
+                  <li><strong>WebSocket Gateway:</strong> Real-time comment streaming to viewers</li>
+                  <li><strong>Rate Limiter:</strong> Prevent spam and abuse from individual users</li>
+                  <li><strong>Analytics Service:</strong> Comment engagement and sentiment analysis</li>
+                </ul>
+
+                <h5>Scaling strategies</h5>
+                <ul>
+                  <li><strong>Event Sharding:</strong> Distribute comments across multiple streams</li>
+                  <li><strong>Geographic Distribution:</strong> Regional comment servers for reduced latency</li>
+                  <li><strong>Comment Sampling:</strong> Show representative subset during high volume</li>
+                  <li><strong>Caching Layers:</strong> Hot comments and user data for fast access</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    },
+
+    'tips': {
+      title: 'Interview Success Tips',
+      introduction: "Proven strategies and common patterns to excel in system design interviews at top tech companies.",
+      content: `
+        <div class="tips-section">
+          <h3>Framework Application</h3>
+          <ul class="tips-list">
+            <li><strong>Start with Requirements:</strong> Always clarify functional and non-functional requirements first</li>
+            <li><strong>Think Out Loud:</strong> Explain your reasoning for each design decision</li>
+            <li><strong>Consider Trade-offs:</strong> Discuss alternatives and why you chose specific approaches</li>
+            <li><strong>Scale Incrementally:</strong> Start simple, then add complexity and scale considerations</li>
+            <li><strong>Address Bottlenecks:</strong> Identify potential failure points and mitigation strategies</li>
+          </ul>
+
+          <h3>Technical Depth</h3>
+          <ul class="tips-list">
+            <li><strong>Data Storage:</strong> Choose appropriate databases based on access patterns</li>
+            <li><strong>Caching Strategy:</strong> Implement multi-level caching for performance</li>
+            <li><strong>Load Balancing:</strong> Distribute traffic effectively across servers</li>
+            <li><strong>Monitoring:</strong> Include observability and alerting in designs</li>
+            <li><strong>Security:</strong> Consider authentication, authorization, and data protection</li>
+          </ul>
+
+          <h3>Common Follow-up Questions</h3>
+          <ul class="tips-list">
+            <li>"How would you handle 10x traffic growth?"</li>
+            <li>"What happens if this component fails?"</li>
+            <li>"How would you monitor and debug this system?"</li>
+            <li>"What security considerations are important?"</li>
+            <li>"How would you reduce latency for global users?"</li>
+          </ul>
+        </div>
+      `
+    }
   }
 };
 
@@ -2149,6 +3300,8 @@ function loadTopicContent(category, topic) {
     html = generateInterviewProblemContent(data);
   } else if (category === 'resources') {
     html = generateResourceContent(data);
+  } else if (category === 'complete_guide') {
+    html = generateCompleteGuideContent(data);
   }
 
   contentArea.innerHTML = html;
@@ -2801,6 +3954,27 @@ function generateResourceContent(data) {
             ` : ''}
           </div>
         `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function generateCompleteGuideContent(data) {
+  return `
+    <div class="topic-header">
+      <h1 class="topic-title">${data.title}</h1>
+      <p class="topic-subtitle">${data.introduction}</p>
+      <div class="topic-actions">
+        <button class="completion-btn" id="mark-completed-btn" onclick="toggleTopicCompletion()">
+          <span class="completion-icon">✓</span>
+          <span class="completion-text">Mark as Completed</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="content-section">
+      <div class="section-content">
+        ${data.content}
       </div>
     </div>
   `;
